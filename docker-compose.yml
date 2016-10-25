@@ -4,23 +4,21 @@ services:
   mariadb:
     image: wodby/drupal-mariadb
     environment:
-      #MYSQL_RANDOM_ROOT_PASSWORD: 1
-      MYSQL_DATABASE: project
+      MYSQL_RANDOM_ROOT_PASSWORD: 1
+      MYSQL_DATABASE: drupal
       MYSQL_USER: drupal
       MYSQL_PASSWORD: drupal
-      MYSQL_ROOT_PASSWORD: thispasswordsuckstoo
-      #MYSQL_ALLOW_EMPTY_PASSWORD: 1
 #    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci # The simple way to override the mariadb config.
     volumes:
       - ./docker-runtime/mariadb:/var/lib/mysql
 #      - ./docker-runtime/mariadb-init:/docker-entrypoint-initdb.d # Place init .sql file(s) here.
 
   php:
-    image: wodby/drupal-php:5.6 # Allowed: 7.0, 5.6.
+    image: wodby/drupal-php:7.0 # Allowed: 7.0, 5.6.
     environment:
       PHP_SITE_NAME: dev
       PHP_HOST_NAME: localhost:8000
-      PHP_DOCROOT: ./www/ #public # Relative path inside the /var/www/html/ directory.
+#      PHP_DOCROOT: public # Relative path inside the /var/www/html/ directory.
       PHP_SENDMAIL_PATH: /usr/sbin/sendmail -t -i -S mailhog:1025
       # PHP_XDEBUG_ENABLED: 1
       # PHP_XDEBUG_AUTOSTART: 1
@@ -34,8 +32,8 @@ services:
     environment:
       NGINX_SERVER_NAME: localhost
       NGINX_UPSTREAM_NAME: php
-      NGINX_DOCROOT:  ./www/ #public # Relative path inside the /var/www/html/ directory.
-      DRUPAL_VERSION: 7 # Allowed: 7, 8.
+#      NGINX_DOCROOT: public # Relative path inside the /var/www/html/ directory.
+      DRUPAL_VERSION: 8 # Allowed: 7, 8.
     volumes_from:
       - php
     ports:
@@ -45,14 +43,12 @@ services:
     image: phpmyadmin/phpmyadmin
     environment:
       PMA_HOST: mariadb
-      #PMA_USER: drupal    # For Auto Login
-      #PMA_PASSWORD: drupal    # For Auto Login
+      PMA_USER: drupal
+      PMA_PASSWORD: drupal
       PHP_UPLOAD_MAX_FILESIZE: 1G
       PHP_MAX_INPUT_VARS: 1G
     ports:
      - "8001:80"
-    links:
-      - mariadb     # It's important to link it with DB(mariadb/mysql) otherwise can't connect in root
 
   mailhog:
     image: mailhog/mailhog
